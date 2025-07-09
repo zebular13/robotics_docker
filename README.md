@@ -8,6 +8,8 @@ Contents of Docker image:
 - Gazebo (Harmonic)
 
 Additional content:
+- MoveIt2
+    - built from source, for moveit_py package
 - ASL Controller
    - https://github.com/AlbertaBeef/asl_mediapipe_pointnet
 - MyCobot-280 simulation

@@ -64,6 +64,20 @@ RUN pip install torch
 #RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 # Install pytorch (ROCm 6.3)
 #RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
+
+RUN pip install tensorflow
+
+RUN pip install plotly kaleido
+
+# Install additional packages (personnal preferences)
+RUN apt-get install -y \
+    v4l-utils \
+    yavta \
+    gedit \
+    gimp \
+    evince \
+    tree \
+    meld
     
 # Install additional ROS 2 packages for Yahboom ROSMASTER-X3
 COPY ./gazebo_models.zip /root/

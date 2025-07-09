@@ -31,6 +31,24 @@ echo "Update ROS2 ..."
 rosdep update
 
 #
+# MoveIt2 (from source)
+#
+
+cd /root/ros2_ws/src
+git clone --branch jazzy https://github.com/ros-planning/moveit2.git
+cd /root/ros2_ws/src/moveit2
+rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y
+colcon build --mixin release
+# CMake Error at /opt/ros/jazzy/share/ompl/cmake/omplConfig.cmake:11 (message):
+#   File or directory /usr/local/lib/x86_64-linux-gnu referenced by variable
+#   OMPL_LIBRARY_DIRS does not exist !
+# Call Stack (most recent call first):
+#   /opt/ros/jazzy/share/ompl/cmake/omplConfig.cmake:108 (set_and_check)
+#   CMakeLists.txt:23 (find_package)
+#colcon build --mixin release --packages-skip moveit_planners_ompl
+source install/setup.bash
+
+#
 # ASL Controller
 #
 

@@ -9,3 +9,8 @@ alias mtc_demos='bash ~/ros2_ws/src/mycobot_ros2/mycobot_bringup/scripts/mycobot
 alias pick='bash ~/ros2_ws/src/mycobot_ros2/mycobot_mtc_pick_place_demo/scripts/robot.sh'
 alias pointcloud='bash ~/ros2_ws/src/mycobot_ros2/mycobot_mtc_pick_place_demo/scripts/pointcloud.sh'
 alias robot='bash ~/ros2_ws/src/mycobot_ros2/mycobot_bringup/scripts/mycobot_280_gazebo.sh'
+#
+alias yahboom='ros2 launch urdf_tutorial display.launch.py model:=/root/ros2_ws/src/yahboom_rosmaster/yahboom_rosmaster_description/urdf/robots/rosmaster_x3.urdf.xacro'
+alias x3='bash ~/ros2_ws/src/yahboom_rosmaster/yahboom_rosmaster_bringup/scripts/rosmaster_x3_gazebo.sh'
+alias nav='bash ~/ros2_ws/src/yahboom_rosmaster/yahboom_rosmaster_bringup/scripts/rosmaster_x3_navigation.sh'
+
