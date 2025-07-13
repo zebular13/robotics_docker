@@ -151,7 +151,7 @@ Control Robotic Arm with Hand Signs
    - U : Move Up
    - D : Move Down
 
-![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo04_ros2_gazebo_mycobot.gif)
+![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo03_ros2_gazebo_mycobot.gif)
 
 
 
