@@ -64,20 +64,95 @@ Making the local host's GUI available to the Docker image:
 
 ## Running the ASL-controlled Turtlesim demo
 
-- ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_turtlesim.launch.py
+Launch the asl_controller_twist node with turtlesim:
 
+   - ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_turtlesim.launch.py
+
+Control Turtle with Hand Signs
+
+   - A : Advance
+   - B : Backup
+   - L : Turn Left
+   - R : Turn Right
+   
 ![](images/asl_mediapipe_pointnet_demo01_ros2_turtlesim.gif)
-
-## Running the ASL-controlled Yahboom ROSMASTER-X3 demo
-
-- ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_rosmaster.launch.py
 
 
 ## Running the ASL-controlled MOGI-ROS wheeled vehicle demo
 
-- ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_mogiros.launch.py
+Launch the asl_controller_twist node with MOGI-ROS vehicle:
+
+   - ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_mogiros_car.launch.py
+
+Control Vehicle with Hand Signs
+
+   - A : Advance
+   - B : Backup
+   - L : Turn Left
+   - R : Turn Right
 
 ![](images/asl_mediapipe_pointnet_demo01_ros2_gazebo.gif)
+
+
+## Running the ASL-controlled Yahboom ROSMASTER-X3 demo
+
+Launch the asl_controller_twist node with ROSMASTER-X3 vehicle:
+
+   - ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_rosmaster.launch.py
+
+Control Vehicle with Hand Signs
+
+   - A : Advance
+   - B : Backup
+   - L : Turn Left
+   - R : Turn Right
+
+
+![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo02_ros2_gazebo_rosmaster.gif)
+
+
+## Running the ASL-controlled MOGI-ROS robotic arm demo
+
+Launch the asl_controller_pose node with MOGI-ROS simple robotic arm:
+
+   - ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_mogiros_arm.launch.py
+
+Control Robotic Arm with Left/Right Hands:
+
+   - Left Hand
+      - L : Turn Arm Left
+      - R : Turn Arm Right
+      - A : Advance Arm (shoulder joint)
+      - B : Backup Arm (shoulder joint)
+      - U : Lift Arm (elbow joint)
+      - D : Lower Arm (elbow joint)
+
+   - Right Hand
+      - A : Close Gripper
+      - B : Open Gripper
+
+![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo04_ros2_gazebo_mogiros_arm.gif)
+
+
+## Running the ASL-controlled MYCOBOT-280 robotic arm demo
+
+Launch the asl_controller_pose node with MYCOBOT-280 robotic arm:
+
+   - moveit &
+   - ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_mycobot.launch.py
+
+
+Control Robotic Arm with Hand Signs
+
+   - L : Move Left
+   - R : Move Right
+   - A : Move Forward
+   - B : Move Backward
+   - U : Move Up
+   - D : Move Down
+
+![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo04_ros2_gazebo_mycobot.gif)
+
 
 
 ## References
