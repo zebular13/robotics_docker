@@ -73,6 +73,17 @@ cd /root/ros2_ws/src/asl_mediapipe_pointnet
 colcon build
 source install/setup.bash
 
+# Copy asl_moveit_demos to ros2_ws/src and Build
+cd /root/ros2_ws/src
+echo "Copying asl_moveit_demos to ros2_ws directory ..."
+cp -r /root/asl_mediapipe_pointnet/ros2_ws/asl_moveit_demos .
+echo "Installing ROS 2 dependencies for asl_moveit_demos ..."
+rosdep install -i --from-path asl_moveit_demos --rosdistro $ROS_DISTRO -y
+echo "Building asl_moveit_demos ..."
+cd /root/ros2_ws/src/asl_moveit_demos
+colcon build
+source install/setup.bash
+
 #
 # MyCobot 280
 #

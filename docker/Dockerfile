@@ -48,6 +48,8 @@ RUN apt-get install -y \
     ros-${ROS_DISTRO}-demo-nodes-py \
     ros-${ROS_DISTRO}-rviz2 \
     ros-${ROS_DISTRO}-rqt-reconfigure \
+    ros-${ROS_DISTRO}-rqt-joint-trajectory-controller \
+    ros-${ROS_DISTRO}-rqt-graph \
     ros-${ROS_DISTRO}-v4l2-camera
 
 # Install additional ROS 2 packages for ASL Controller

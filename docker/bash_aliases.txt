@@ -13,4 +13,5 @@ alias robot='bash ~/ros2_ws/src/mycobot_ros2/mycobot_bringup/scripts/mycobot_280
 alias yahboom='ros2 launch urdf_tutorial display.launch.py model:=/root/ros2_ws/src/yahboom_rosmaster/yahboom_rosmaster_description/urdf/robots/rosmaster_x3.urdf.xacro'
 alias x3='bash ~/ros2_ws/src/yahboom_rosmaster/yahboom_rosmaster_bringup/scripts/rosmaster_x3_gazebo.sh'
 alias nav='bash ~/ros2_ws/src/yahboom_rosmaster/yahboom_rosmaster_bringup/scripts/rosmaster_x3_navigation.sh'
-
+#
+alias simple_arm='ros2 launch bme_ros2_simple_arm spawn_robot.launch.py'
