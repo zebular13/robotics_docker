@@ -75,7 +75,7 @@ Control Turtle with Hand Signs
    - L : Turn Left
    - R : Turn Right
    
-![](images/asl_mediapipe_pointnet_demo01_ros2_turtlesim.gif)
+![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo01_ros2_turtlesim.gif)
 
 
 ## Running the ASL-controlled MOGI-ROS wheeled vehicle demo
@@ -91,7 +91,7 @@ Control Vehicle with Hand Signs
    - L : Turn Left
    - R : Turn Right
 
-![](images/asl_mediapipe_pointnet_demo01_ros2_gazebo.gif)
+![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo01_ros2_gazebo.gif)
 
 
 ## Running the ASL-controlled Yahboom ROSMASTER-X3 demo
