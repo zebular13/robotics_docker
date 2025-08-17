@@ -85,6 +85,41 @@ colcon build
 source install/setup.bash
 
 #
+# Hand Controller
+#
+
+# Install hand_controller
+echo "Installing hand_controller ..."
+cd /root
+if [ ! -d "hand_controller" ]; then
+    git clone --recursive https://github.com/AlbertaBeef/hand_controller.git
+    cd hand_controller
+    # Download the ASL model
+    cd asl_pointnet
+    source ./get_model.sh
+    cd ..
+    # Download the TFLite mediapipe models
+    cd blaze_app_python/blaze_tflite/models
+    source ./get_tflite_models.sh
+    cd ../../..
+    # Download the PyTorch mediapipe models
+    cd blaze_app_python/blaze_pytorch/models
+    source ./get_pytorch_models.sh
+    cd ../../..
+fi
+
+# Copy hand_controller to ros2_ws/src and Build
+cd /root/ros2_ws/src
+echo "Copying hand_controller to ros2_ws directory ..."
+cp -r /root/hand_controller/ros2_ws/hand_controller .
+echo "Installing ROS 2 dependencies for hand_controller ..."
+rosdep install -i --from-path hand_controller --rosdistro $ROS_DISTRO -y
+echo "Building hand_controller ..."
+cd /root/ros2_ws/src/hand_controller
+colcon build
+source install/setup.bash
+
+#
 # MyCobot 280
 #
 
