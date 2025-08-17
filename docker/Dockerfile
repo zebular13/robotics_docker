@@ -69,7 +69,13 @@ RUN pip install torch
 
 RUN pip install tensorflow
 
-RUN pip install plotly kaleido
+RUN pip install tflite
+
+#RUN pip install tflite-runtime
+# ???
+# > [11/24] RUN pip install tflite-runtime:                                                                                            
+#1.573 ERROR: Could not find a version that satisfies the requirement tflite-runtime (from versions: none)                             
+#1.573 ERROR: No matching distribution found for tflite-runtime
 
 # Install additional packages (personnal preferences)
 RUN apt-get install -y \
