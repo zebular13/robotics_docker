@@ -64,9 +64,13 @@ Making the local host's GUI available to the Docker image:
 
 ## Running the ASL-controlled Turtlesim demo
 
-Launch the asl_controller_twist node with turtlesim:
+Launch the asl_controller_twist node with usbcam_publisher and turtlesim nodes:
 
-   - ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_turtlesim.launch.py
+   - ros2 launch asl_mediapipe_pointnet demo01_turtlesim_asl_part1.launch.py | ros2 launch asl_mediapipe_pointnet demo01_turtlesim_asl_part2.launch.py
+
+Launch the hand_controller_asl_twist node with usbcam_publisher and turtlesim nodes:
+
+   - ros2 launch hand_controller demo01_turtlesim_asl_part1.launch.py | ros2 launch hand_controller demo01_turtlesim_asl_part2.launch.py
 
 Control Turtle with Hand Signs
 
@@ -80,9 +84,13 @@ Control Turtle with Hand Signs
 
 ## Running the ASL-controlled MOGI-ROS wheeled vehicle demo
 
-Launch the asl_controller_twist node with MOGI-ROS vehicle:
+Launch the asl_controller_twist node with the MOGI-ROS wheeled vehicle:
 
-   - ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_mogiros_car.launch.py
+   - ros2 launch asl_mediapipe_pointnet demo11_mogiros_car_asl_part1.launch.py | ros2 launch asl_mediapipe_pointnet demo11_mogiros_car_asl_part2.launch.py
+
+Launch the hand_controller_asl_twist node with the MOGI-ROS wheeled vehicle:
+
+   - ros2 launch hand_controller demo11_mogiros_car_asl_part1.launch.py | ros2 launch hand_controller demo11_mogiros_car_asl_part2.launch.py
 
 Control Vehicle with Hand Signs
 
@@ -98,7 +106,11 @@ Control Vehicle with Hand Signs
 
 Launch the asl_controller_twist node with ROSMASTER-X3 vehicle:
 
-   - ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_rosmaster.launch.py
+   - ros2 launch asl_mediapipe_pointnet demo12_rosmaster_asl_part1.launch.py | ros2 launch asl_mediapipe_pointnet demo12_rosmaster_asl_part2.launch.py
+
+Launch the hand_controller_asl_twist node with ROSMASTER-X3 vehicle:
+
+   - ros2 launch hand_controller demo12_rosmaster_asl_part1.launch.py | ros2 launch hand_controller demo12_rosmaster_asl_part2.launch.py
 
 Control Vehicle with Hand Signs
 
@@ -107,7 +119,6 @@ Control Vehicle with Hand Signs
    - L : Turn Left
    - R : Turn Right
 
-
 ![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo02_ros2_gazebo_rosmaster.gif)
 
 
@@ -115,7 +126,11 @@ Control Vehicle with Hand Signs
 
 Launch the asl_controller_pose node with MOGI-ROS simple robotic arm:
 
-   - ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_mogiros_arm.launch.py
+   - ros2 launch asl_mediapipe_pointnet demo21_mogiros_arm_asl_part1.launch.py | ros2 launch asl_mediapipe_pointnet demo21_mogiros_arm_asl_part2.launch.py
+
+Launch the hand_controller_asl_pose node with MOGI-ROS simple robotic arm:
+
+   - ros2 launch hand_controller demo21_mogiros_arm_asl_part1.launch.py | ros2 launch hand_controller demo21_mogiros_arm_asl_part2.launch.py
 
 Control Robotic Arm with Left/Right Hands:
 
@@ -138,8 +153,11 @@ Control Robotic Arm with Left/Right Hands:
 
 Launch the asl_controller_pose node with MYCOBOT-280 robotic arm:
 
-   - moveit &
-   - ros2 launch asl_mediapipe_pointnet asl_mediapipe_pointnet_mycobot.launch.py
+   - ros2 launch asl_mediapipe_pointnet demo31_mycobot_asl_part1.launch.py | moveit | ros2 launch hand_controller demo31_mycobot_asl_part2.launch.py
+
+Launch the hand_controller_asl_pose node with MYCOBOT-280 robotic arm:
+
+   - ros2 launch hand_controller demo31_mycobot_asl_part1.launch.py | moveit | ros2 launch hand_controller demo31_mycobot_asl_part2.launch.py
 
 
 Control Robotic Arm with Hand Signs
@@ -154,7 +172,6 @@ Control Robotic Arm with Hand Signs
 ![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo03_ros2_gazebo_mycobot.gif)
 
 
-
 ## References
 
 The Complete Guide to Docker for ROS 2 Jazzy Projects
@@ -163,7 +180,7 @@ The Complete Guide to Docker for ROS 2 Jazzy Projects
 Automatic Addison on-line Tutorials:
    - https://automaticaddison.com/tutorials
    - https://github.com/automaticaddison/mycobot_ros2 (branch=jazzy)
-   - https://github.com/automaticaddison/yahboom_rosmaster   
+   - https://github.com/automaticaddison/yahboom_rosmaster
 
 MOGI-ROS on-line Tutorials:
    - https://github.com/MOGI-ROS/Week-1-2-Introduction-to-ROS2
@@ -172,8 +189,17 @@ MOGI-ROS on-line Tutorials:
    - https://github.com/MOGI-ROS/Week-7-8-ROS2-Navigation
    - https://github.com/MOGI-ROS/Week-9-10-Simple-arm
 
-ASL Recognition using PointNet
-   - Article [Medium](https://medium.com/@er_95882/asl-recognition-using-pointnet-and-mediapipe-f2efda78d089)
-   - Dataset [Kaggle](https://www.kaggle.com/datasets/ayuraj/asl-dataset)
-   - Source [Github](https://github.com/e-roe/pointnet_hands/tree/main)
+Accelerating MediaPipe:
+   - Hackster Series Part 1 [Blazing Fast Models](https://avnet.me/mediapipe-01-models)
+   - Hackster Series Part 2 [Insightful Datasets for ASL recognition](https://avnet.me/mediapipe-02-datasets)
+   - Hackster Series Part 3 [Accelerating the MediaPipe models with Vitis-AI 3.5](https://avnet.me/mediapipe-03-vitis-ai-3.5)
+   - Hackster Series Part 4 [Accelerating the MediaPipe models with Hailo-8](https://avnet.me/mediapipe-04-Hailo-8)
+   - Hackster Series Part 5 [Accelerating the MediaPipe models on RPI5 AI Kit](https://avnet.me/mediapipe-05-rpi5aikit)
+   - Hackster Series Part 6 [Accelerating the MediaPipe models with MemryX](https://avnet.me/mediapipe-06-memryx)
+   - Blaze Utility (python version) : [blaze_app_python](https://github.com/albertabeef/blaze_app_python)
+   - Blaze Utility (C++ version) : [blaze_app_cpp](https://github.com/albertabeef/blaze_app_cpp)
 
+ASL Recognition using PointNet (by Edward Roe):
+   - Medium Article [ASL Recognition using PointNet and MediaPipe](https://medium.com/@er_95882/asl-recognition-using-pointnet-and-mediapipe-f2efda78d089)
+   - Kaggle Dataset [American Sign Language Dataset](https://www.kaggle.com/datasets/ayuraj/asl-dataset)
+   - GitHub Source [pointnet_hands](https://github.com/e-roe/pointnet_hands/tree/main)
