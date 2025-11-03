@@ -1,7 +1,36 @@
 #!/bin/bash
 
+# Set the base directory where we'll clone/check for the repo
+BASE_DIR="/home/monica"
+REPO_DIR="$BASE_DIR/robotics_docker"
+WORKSPACE_DIR="$BASE_DIR/robotics_workspace"
+
+# Check if robotics_docker repo exists, if not clone it
+echo "Checking for robotics_docker repository..."
+if [ ! -d "$REPO_DIR" ]; then
+    echo "Repository not found. Cloning robotics_docker..."
+    cd "$BASE_DIR"
+    git clone https://github.com/AlbertaBeef/robotics_docker.git
+    echo "Repository cloned successfully!"
+    
+    # Create persistent storage directory
+    echo "Creating persistent storage directory..."
+    mkdir -p "$WORKSPACE_DIR"
+    
+    # Update docker-compose.yml with persistent storage path
+    echo "Configuring docker-compose.yml for persistent storage..."
+    sed -i "s|/media/albertabeef/Tycho/ROS2/shared/ros2|$WORKSPACE_DIR|g" "$REPO_DIR/compose/docker-compose.yml"
+    echo "docker-compose.yml updated!"
+else
+    echo "Repository already exists at $REPO_DIR"
+fi
+
+# Pull the latest Docker image
+echo "Pulling latest Docker image..."
+docker pull albertabeef/robotics_docker:latest
+
 # Navigate to the compose directory
-cd /home/monica/robotics_docker/compose # change to your path where docker-compose.yml is located
+cd "$REPO_DIR/compose"
 
 # Launch the docker container
 echo "Starting Docker container..."

@@ -4,6 +4,6 @@ Type=Application
 Name=Robotics Demo
 Comment=Launch ROS2 Hand Controller Demo
 Exec=gnome-terminal -- bash -c "/home/monica/launch_robotics_demo.sh; exec bash"
-Icon=/usr/share/icons/Adwaita/scalable/categories/applications-engineering-symbolic.svg
+Icon=robotics-demo.png
 Terminal=true
 Categories=Development;Robotics;
