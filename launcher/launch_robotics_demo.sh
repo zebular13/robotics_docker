@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the base directory where we'll clone/check for the repo
-BASE_DIR="/home/monica"
+BASE_DIR="/home/$USER"
 REPO_DIR="$BASE_DIR/robotics_docker"
 WORKSPACE_DIR="$BASE_DIR/robotics_workspace"
 
@@ -52,7 +52,6 @@ if [ ! -f /root/hand_controller/ros2_ws/install/setup.bash ]; then
     git pull
     cd ros2_ws
     colcon build
-    echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc
     echo "source /root/hand_controller/ros2_ws/install/setup.bash >> /root/.bashrc" 
     echo "Workspace built successfully!"
 else
