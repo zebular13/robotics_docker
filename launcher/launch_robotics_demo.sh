@@ -141,7 +141,7 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
     fi
 
     # Check if model file exists on Vision AI Kit
-    MODEL_EXISTS=$(sshpass -p "$VISION_KIT_PASSWORD" ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP "[ -f /root/hand_controller/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim ] && echo 'yes' || echo 'no'")
+    MODEL_EXISTS=$(sshpass -p "$VISION_KIT_PASSWORD" ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP "[ -f /root/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim ] && echo 'yes' || echo 'no'")
 
     if [ "$MODEL_EXISTS" = "no" ]; then
         echo "Model file not found on Vision AI Kit."
@@ -164,25 +164,13 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
             echo "Model file already downloaded on host."
         fi
         
-        # Ensure hand_controller directory exists on Vision AI Kit
-        echo "Ensuring hand_controller directory exists..."
-        sshpass -p "$VISION_KIT_PASSWORD" ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP "mkdir -p /root/hand_controller"
-        
         # Copy to Vision AI Kit
         echo "Copying model file to Vision AI Kit..."
         sshpass -p "$VISION_KIT_PASSWORD" scp /tmp/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim \
-            root@$VISION_KIT_IP:/root/hand_controller/
-        
-        # Make executable
-        sshpass -p "$VISION_KIT_PASSWORD" ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP \
-            "chmod +x /root/hand_controller/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim"
-        
+            root@$VISION_KIT_IP:/root/
         echo "Model file transferred successfully."
     else
         echo "Model file already exists on Vision AI Kit."
-        # Make sure it's executable
-        sshpass -p "$VISION_KIT_PASSWORD" ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP \
-            "chmod +x /root/hand_controller/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim"
     fi
     
     # Now run the main setup in a single SSH session
@@ -241,7 +229,7 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
         echo "flask version: $FLASK_VERSION"
     else
         echo "flask not found in system site-packages. Installing..."
-        pip3 install --target=/usr/lib/python3.12/site-packages flask==3.0.0
+        pip3 install --target=/usr/lib/python3.12/site-packages flask==3.0.0 
         
         # Verify installation
         FLASK_VERIFY=$(python3 -c "import sys; sys.path.insert(0, '/usr/lib/python3.12/site-packages'); import flask; print(flask.__file__)" 2>/dev/null)
@@ -254,13 +242,59 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
         fi
     fi
 
-    # Clone hand_controller if it doesn't exist
+    # Clone hand_controller if it doesn't exist or is incomplete
+    echo "Checking hand_controller repository..."
     if [ ! -d /root/hand_controller ]; then
-        echo "Cloning hand_controller repository..."
+        echo "hand_controller repository not found. Cloning..."
         cd /root
         git clone --recursive https://github.com/AlbertaBeef/hand_controller
+        echo "Repository cloned."
+    elif [ ! -d /root/hand_controller/.git ]; then
+        echo "hand_controller directory exists but is not a git repository. Re-cloning..."
+        rm -rf /root/hand_controller
+        cd /root
+        git clone --recursive https://github.com/AlbertaBeef/hand_controller
+        echo "Repository cloned."
     else
-        echo "hand_controller repository already exists."
+        echo "hand_controller repository exists. Checking integrity..."
+        cd /root/hand_controller
+        
+        # Check if it's a valid git repo and fetch latest
+        if git rev-parse --git-dir > /dev/null 2>&1; then
+            # Check for essential directories/files
+            if [ ! -d "ros2_ws" ] || [ ! -d "launch" ]; then
+                echo "Repository appears incomplete. Re-cloning..."
+                cd /root
+                rm -rf hand_controller
+                git clone --recursive https://github.com/AlbertaBeef/hand_controller
+                echo "Repository cloned."
+            else
+                # Update submodules if needed
+                echo "Updating repository and submodules..."
+                git pull
+                git submodule update --init --recursive
+                echo "✓ Repository up to date."
+            fi
+        else
+            echo "Invalid git repository. Re-cloning..."
+            cd /root
+            rm -rf hand_controller
+            git clone --recursive https://github.com/AlbertaBeef/hand_controller
+            echo "Repository cloned."
+        fi
+    fi
+
+    # Move model file to correct location and set permissions
+    mv /root/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim /root/hand_controller/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim
+    chmod +x /root/hand_controller/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim
+
+    # Final verification
+    if [ -d /root/hand_controller/ros2_ws ] && [ -d /root/hand_controller/launch ]; then
+        echo "✓ hand_controller repository verified."
+    else
+        echo "⚠ Warning: hand_controller repository may be incomplete."
+        echo "Contents of /root/hand_controller:"
+        ls -la /root/hand_controller/
     fi
     
     # Check if ROS2 package needs to be extracted
