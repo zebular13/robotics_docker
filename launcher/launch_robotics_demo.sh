@@ -61,7 +61,7 @@ fi
 # Download Edge Impulse model file if it doesn't exist
 echo "Checking for Edge Impulse model file..."
 docker compose exec robotics_demo bash -ic '
-if [ ! -f /root/hand_controller/hands-v2-yolov5-linux-amd86-v39new.eim ]; then
+if [ ! -f /root/hand_controller/hands-v2-yolov5-linux-x86.eim ]; then
     echo "Downloading Edge Impulse model file..."
     cd /root/hand_controller
     wget -O hands-v2-yolov5-linux-x86.eim "https://avtinc.sharepoint.com/:u:/t/ET-Downloads/Ec5lhZN6XpZCug51d3brcWMBgfKSJgnYKpF1zopW1LUNqg?e=sgoHmO&download=1"
@@ -205,18 +205,54 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
         echo "Edge Impulse tools already installed."
     fi
     
-    echo "Installing edge_impulse_linux pip package..."
-    pip3 install edge_impulse_linux
+    # Install edge_impulse_linux to system site-packages
+    echo "Checking for edge_impulse_linux package..."
+    if python3 -c "import sys; import edge_impulse_linux; print(edge_impulse_linux.__file__)" 2>/dev/null | grep -q "/usr/lib/python3.12/site-packages"; then
+        echo "edge_impulse_linux already installed in system site-packages."
+    else
+        echo "Installing edge_impulse_linux to system site-packages..."
+        pip3 install --target=/usr/lib/python3.12/site-packages edge_impulse_linux
+        
+        # Verify installation in correct location
+        if python3 -c "import sys; sys.path.insert(0, '/usr/lib/python3.12/site-packages'); import edge_impulse_linux; print('Success')" 2>/dev/null | grep -q "Success"; then
+            echo "✓ edge_impulse_linux installed successfully in /usr/lib/python3.12/site-packages"
+        else
+            echo "⚠ Warning: edge_impulse_linux installation verification failed."
+        fi
 
-    # Fix edge_impulse_linux by commenting out pyaudio
-    echo "Fixing edge_impulse_linux package..."
-    sed -i 's/^from edge_impulse_linux import audio/#from edge_impulse_linux import audio/' \
-        /root/.local/lib/python3.12/site-packages/edge_impulse_linux/__init__.py
-    echo "edge_impulse_linux installed."
+        # Fix edge_impulse_linux by commenting out pyaudio
+        echo "Fixing edge_impulse_linux package..."
+        if [ -f /usr/lib/python3.12/site-packages/edge_impulse_linux/__init__.py ]; then
+            sed -i 's/^from edge_impulse_linux import audio/#from edge_impulse_linux import audio/' \
+                /usr/lib/python3.12/site-packages/edge_impulse_linux/__init__.py
+            echo "✓ edge_impulse_linux package fixed."
+        else
+            echo "⚠ Warning: Could not find __init__.py to fix."
+        fi
+    fi
     
-    echo "Installing flask pip package..."
-    pip3 install flask==3.0.0
-    echo "flask installed."
+    # Install flask if not already installed in system site-packages
+    echo "Checking for flask package..."
+    FLASK_CHECK=$(python3 -c "import sys; sys.path.insert(0, '/usr/lib/python3.12/site-packages'); import flask; print(flask.__file__)" 2>/dev/null)
+
+    if echo "$FLASK_CHECK" | grep -q "/usr/lib/python3.12/site-packages"; then
+        echo "flask already installed in system site-packages."
+        FLASK_VERSION=$(python3 -c "import sys; sys.path.insert(0, '/usr/lib/python3.12/site-packages'); import flask; print(flask.__version__)" 2>/dev/null)
+        echo "flask version: $FLASK_VERSION"
+    else
+        echo "flask not found in system site-packages. Installing..."
+        pip3 install --target=/usr/lib/python3.12/site-packages flask==3.0.0
+        
+        # Verify installation
+        FLASK_VERIFY=$(python3 -c "import sys; sys.path.insert(0, '/usr/lib/python3.12/site-packages'); import flask; print(flask.__file__)" 2>/dev/null)
+        if echo "$FLASK_VERIFY" | grep -q "/usr/lib/python3.12/site-packages"; then
+            FLASK_VERSION=$(python3 -c "import sys; sys.path.insert(0, '/usr/lib/python3.12/site-packages'); import flask; print(flask.__version__)" 2>/dev/null)
+            echo "✓ flask $FLASK_VERSION installed successfully in system site-packages."
+        else
+            echo "⚠ Warning: flask installation verification failed."
+            echo "Attempted import returned: $FLASK_VERIFY"
+        fi
+    fi
 
     # Clone hand_controller if it doesn't exist
     if [ ! -d /root/hand_controller ]; then
@@ -278,7 +314,7 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
     echo "Launching Vision AI Kit demo..."
     ros2 launch hand_controller demo11_mogiros_car_part1_ei1dials.launch.py \
         verbose:=False \
-        model:=/root/hand_controller/hands-v2-yolov5-linux-aarch64-qnn-v36.eim \
+        model:=/root/hand_controller/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim \
         use_flask:=True
     
 ENDSSH
