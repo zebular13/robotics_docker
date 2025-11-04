@@ -31,4 +31,4 @@ The first terminal will ask for your Vision AI Kit's password and continue setup
 To stop Part 1 of the demo, simply close the terminal.
 
 To stop Part 2 of the demo, open a new terminal and type:
-```docker stop robotics_demo stop```
+```docker stop robotics_demo```
