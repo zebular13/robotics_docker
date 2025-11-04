@@ -7,6 +7,7 @@
 - Edit ```launch_robotics_demo.sh``` to include your board's IP address on **line 9**
 
 - Run the launcher:
+
 ```chmod +x install_launcher.sh```
 ```./install_launcher.sh```
 
