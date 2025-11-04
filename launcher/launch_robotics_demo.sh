@@ -103,58 +103,121 @@ sleep 3
 # Setup Vision AI Kit (QC6490 board)
 echo "Setting up Vision AI Kit (QC6490 board)..."
 
-# Setup SSH keys for Vision AI Kit if not already configured
-echo "Setting up SSH authentication for Vision AI Kit..."
-if ! ssh -o BatchMode=yes -o ConnectTimeout=2 root@$VISION_KIT_IP exit 2>/dev/null; then
-    echo "SSH key authentication not set up. Setting up now..."
-    
-    # Check if SSH key exists, if not create one
-    if [ ! -f ~/.ssh/id_rsa ]; then
-        echo "Generating SSH key..."
-        ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
-    fi
-    
-    # Copy SSH key to Vision AI Kit (will prompt for password once)
-    echo "Copying SSH key to Vision AI Kit (you'll need to enter the password once)..."
-    ssh-copy-id -o StrictHostKeyChecking=no root@$VISION_KIT_IP
-    
-    echo "SSH key authentication configured!"
-else
-    echo "SSH key authentication already configured."
-fi
-
 # Check if we can reach the board
 if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
     echo "Vision AI Kit detected at $VISION_KIT_IP"
     
-    # Note: This requires sshpass for password authentication
-    # Install with: sudo apt-get install sshpass
+    # Check if ROS package exists on Vision AI Kit
+    ROS_PACKAGE_EXISTS=$(sshpass -p "$VISION_KIT_PASSWORD" ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP "[ -f /opt/hand_controller_ros2_qsc6490.tar.gz ] && echo 'yes' || echo 'no'")
     
-    ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP 'bash -s' << 'ENDSSH'
+    if [ "$ROS_PACKAGE_EXISTS" = "no" ]; then
+        echo "ROS2 package not found on Vision AI Kit."
+        
+        # Download on host machine if needed
+        if [ ! -f /tmp/hand_controller_ros2_qsc6490.tar.gz ]; then
+            echo "Downloading ROS2 package on host machine..."
+            wget -O /tmp/hand_controller_ros2_qsc6490.tar.gz \
+                "https://avtinc.sharepoint.com/:u:/t/ET-Downloads/EbMBA64GB35Bjwq5wMnYi0UBP_RiqKUYtWK3QhVd7Wzgtw?e=8jCubK&download=1"
+            
+            # Verify file size (should be around 78.7 MB = ~82,000,000 bytes)
+            FILE_SIZE=$(stat -c%s /tmp/hand_controller_ros2_qsc6490.tar.gz 2>/dev/null || stat -f%z /tmp/hand_controller_ros2_qsc6490.tar.gz 2>/dev/null)
+            if [ "$FILE_SIZE" -lt 10000000 ]; then
+                echo "Error: Downloaded file is too small ($FILE_SIZE bytes). Download may have failed."
+                rm /tmp/hand_controller_ros2_qsc6490.tar.gz
+                exit 1
+            fi
+            echo "Download complete. File size: $FILE_SIZE bytes"
+        else
+            echo "ROS2 package already downloaded on host."
+        fi
+        
+        # Copy to Vision AI Kit
+        echo "Copying ROS2 package to Vision AI Kit..."
+        sshpass -p "$VISION_KIT_PASSWORD" scp /tmp/hand_controller_ros2_qsc6490.tar.gz \
+            root@$VISION_KIT_IP:/opt/
+        echo "Copy complete."
+    else
+        echo "ROS2 package already exists on Vision AI Kit."
+    fi
+
+    # Check if model file exists on Vision AI Kit
+    MODEL_EXISTS=$(sshpass -p "$VISION_KIT_PASSWORD" ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP "[ -f /root/hand_controller/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim ] && echo 'yes' || echo 'no'")
+
+    if [ "$MODEL_EXISTS" = "no" ]; then
+        echo "Model file not found on Vision AI Kit."
+        
+        # Download on host machine if needed
+        if [ ! -f /tmp/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim ]; then
+            echo "Downloading Edge Impulse model file on host machine..."
+            wget -O /tmp/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim \
+                "https://avtinc.sharepoint.com/:u:/t/ET-Downloads/ER93CZ3Nc8xMomCf9uGyBe8BruM9h48BBru-8s3X-38djQ?e=ZCOr7e&download=1"
+            
+            # Verify file size (should be reasonably large, not an error page)
+            FILE_SIZE=$(stat -c%s /tmp/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim 2>/dev/null || stat -f%z /tmp/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim 2>/dev/null)
+            if [ "$FILE_SIZE" -lt 100000 ]; then
+                echo "Error: Downloaded model file is too small ($FILE_SIZE bytes). Download may have failed."
+                rm /tmp/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim
+                exit 1
+            fi
+            echo "Model download complete. File size: $FILE_SIZE bytes"
+        else
+            echo "Model file already downloaded on host."
+        fi
+        
+        # Ensure hand_controller directory exists on Vision AI Kit
+        echo "Ensuring hand_controller directory exists..."
+        sshpass -p "$VISION_KIT_PASSWORD" ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP "mkdir -p /root/hand_controller"
+        
+        # Copy to Vision AI Kit
+        echo "Copying model file to Vision AI Kit..."
+        sshpass -p "$VISION_KIT_PASSWORD" scp /tmp/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim \
+            root@$VISION_KIT_IP:/root/hand_controller/
+        
+        # Make executable
+        sshpass -p "$VISION_KIT_PASSWORD" ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP \
+            "chmod +x /root/hand_controller/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim"
+        
+        echo "Model file transferred successfully."
+    else
+        echo "Model file already exists on Vision AI Kit."
+        # Make sure it's executable
+        sshpass -p "$VISION_KIT_PASSWORD" ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP \
+            "chmod +x /root/hand_controller/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim"
+    fi
+    
+    # Now run the main setup in a single SSH session
+    sshpass -p "$VISION_KIT_PASSWORD" ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP 'bash -s' << 'ENDSSH'
     
     # Check and install Edge Impulse setup script
-    if [ ! -f /root/setup-edge-impulse-qc-linux.sh ]; then
-        echo "Downloading Edge Impulse setup script..."
-        cd /root
-        wget https://cdn.edgeimpulse.com/firmware/linux/setup-edge-impulse-qc-linux.sh
+    if [ ! -d edge-impulse-tools ]; then
+        echo "Edge Impulse tools not found. Installing..."
+        
+        # Download setup script if it doesn't exist
+        if [ ! -f /root/setup-edge-impulse-qc-linux.sh ]; then
+            echo "Downloading Edge Impulse setup script..."
+            wget https://cdn.edgeimpulse.com/firmware/linux/setup-edge-impulse-qc-linux.sh
+        fi
+        
+        # Run the setup script
+        echo "Running Edge Impulse setup script..."
         sh setup-edge-impulse-qc-linux.sh
     else
-        echo "Edge Impulse setup script already exists."
+        echo "Edge Impulse tools already installed."
     fi
     
-    # Install edge_impulse_linux if not already installed
-    if ! python3 -c "import edge_impulse_linux" 2>/dev/null; then
-        echo "Installing edge_impulse_linux package..."
-        pip3 install edge_impulse_linux
-        
-        # Fix edge_impulse_linux by commenting out pyaudio
-        echo "Fixing edge_impulse_linux package..."
-        sed -i 's/^from edge_impulse_linux import audio/#from edge_impulse_linux import audio/' \
-            /root/.local/lib/python3.12/site-packages/edge_impulse_linux/__init__.py
-    else
-        echo "edge_impulse_linux already installed."
-    fi
+    echo "Installing edge_impulse_linux pip package..."
+    pip3 install edge_impulse_linux
+
+    # Fix edge_impulse_linux by commenting out pyaudio
+    echo "Fixing edge_impulse_linux package..."
+    sed -i 's/^from edge_impulse_linux import audio/#from edge_impulse_linux import audio/' \
+        /root/.local/lib/python3.12/site-packages/edge_impulse_linux/__init__.py
+    echo "edge_impulse_linux installed."
     
+    echo "Installing flask pip package..."
+    pip3 install flask==3.0.0
+    echo "flask installed."
+
     # Clone hand_controller if it doesn't exist
     if [ ! -d /root/hand_controller ]; then
         echo "Cloning hand_controller repository..."
@@ -164,38 +227,33 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
         echo "hand_controller repository already exists."
     fi
     
-    # Download model file if it doesn't exist
-    if [ ! -f /root/hand_controller/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim ]; then
-        echo "Downloading Edge Impulse model file..."
-        cd /root/hand_controller
-        curl -L -o hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim \
-            "https://avtinc.sharepoint.com/:u:/t/ET-Downloads/ER93CZ3Nc8xMomCf9uGyBe8BruM9h48BBru-8s3X-38djQ?e=ZCOr7e&download=1"
-        chmod +x /root/hand_controller/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim
-    else
-        echo "Model file already exists."
-        chmod +x /root/hand_controller/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim
-    fi
-    
-    # Download and extract ROS2 package if it doesn't exist
+    # Check if ROS2 package needs to be extracted
     ROS_PACKAGE_DOWNLOADED=false
-    if [ ! -f /opt/hand_controller_ros2_qsc6490.tar.gz ]; then
-        echo "Downloading ROS2 package..."
-        cd /opt
-        curl -L -o hand_controller_ros2_qsc6490.tar.gz \
-            "https://avtinc.sharepoint.com/:u:/t/ET-Downloads/EbMBA64GB35Bjwq5wMnYi0UBP_RiqKUYtWK3QhVd7Wzgtw?e=Pf5W0a&download=1"
-        ROS_PACKAGE_DOWNLOADED=true
-    else
-        echo "ROS2 package already exists."
+    if [ -f /opt/hand_controller_ros2_qsc6490.tar.gz ]; then
+        # Check if already extracted by looking for the package
+        if [ ! -d /usr/share/hand_controller ]; then
+            ROS_PACKAGE_DOWNLOADED=true
+        fi
     fi
     
-    # If package was just downloaded, extract it
+    # Extract ROS2 package if needed
     if [ "$ROS_PACKAGE_DOWNLOADED" = true ]; then
         echo "Extracting ROS2 package..."
         # Re-mount /usr as writable
         mount -o remount,rw /usr
-        # Extract tarball to /usr
-        tar -zxf /opt/hand_controller_ros2_qsc6490.tar.gz -C /usr/
-        echo "ROS2 package extracted successfully."
+        
+        # Extract tarball to /usr with error checking
+        if tar -zxf /opt/hand_controller_ros2_qsc6490.tar.gz -C /usr/; then
+            echo "ROS2 package extracted successfully."
+            # Wait for filesystem to sync
+            sync
+            sleep 2
+        else
+            echo "Error: Failed to extract ROS2 package!"
+            exit 1
+        fi
+    else
+        echo "ROS2 package already extracted."
     fi
     
     # Initialize ROS environment (ALWAYS)
@@ -206,7 +264,7 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
     
     # Verify hand_controller ROS2 package
     echo "Verifying hand_controller ROS2 package..."
-    PACKAGE_CHECK=$(ros2 pkg executables | grep hand_controller)
+    PACKAGE_CHECK=$(ros2 pkg executables hand_controller 2>&1)
     echo "$PACKAGE_CHECK"
     
     if echo "$PACKAGE_CHECK" | grep -q "hand_controller_ei1dials_twist_node"; then
