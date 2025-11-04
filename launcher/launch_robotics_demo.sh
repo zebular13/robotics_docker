@@ -175,23 +175,25 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
     
     # Now run the main setup in a single SSH session
     sshpass -p "$VISION_KIT_PASSWORD" ssh -o StrictHostKeyChecking=no root@$VISION_KIT_IP 'bash -s' << 'ENDSSH'
-    
-    # Check and install Edge Impulse setup script
-    if [ ! -d edge-impulse-tools ]; then
-        echo "Edge Impulse tools not found. Installing..."
+    # Re-mount /usr as writable
+    mount -o remount,rw /usr
+
+    # # Check and install Edge Impulse setup script
+    # if [ ! -d edge-impulse-tools ]; then
+    #     echo "Edge Impulse tools not found. Installing..."
         
-        # Download setup script if it doesn't exist
-        if [ ! -f /root/setup-edge-impulse-qc-linux.sh ]; then
-            echo "Downloading Edge Impulse setup script..."
-            wget https://cdn.edgeimpulse.com/firmware/linux/setup-edge-impulse-qc-linux.sh
-        fi
+    #     # Download setup script if it doesn't exist
+    #     if [ ! -f /root/setup-edge-impulse-qc-linux.sh ]; then
+    #         echo "Downloading Edge Impulse setup script..."
+    #         wget https://cdn.edgeimpulse.com/firmware/linux/setup-edge-impulse-qc-linux.sh
+    #     fi
         
-        # Run the setup script
-        echo "Running Edge Impulse setup script..."
-        sh setup-edge-impulse-qc-linux.sh
-    else
-        echo "Edge Impulse tools already installed."
-    fi
+    #     # Run the setup script
+    #     echo "Running Edge Impulse setup script..."
+    #     sh setup-edge-impulse-qc-linux.sh
+    # else
+    #     echo "Edge Impulse tools already installed."
+    # fi
     
     # Install edge_impulse_linux to system site-packages
     echo "Checking for edge_impulse_linux package..."
@@ -309,8 +311,6 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
     # Extract ROS2 package if needed
     if [ "$ROS_PACKAGE_DOWNLOADED" = true ]; then
         echo "Extracting ROS2 package..."
-        # Re-mount /usr as writable
-        mount -o remount,rw /usr
         
         # Extract tarball to /usr with error checking
         if tar -zxf /opt/hand_controller_ros2_qsc6490.tar.gz -C /usr/; then
