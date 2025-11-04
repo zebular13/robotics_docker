@@ -8,6 +8,7 @@
 ```chmod +x install_launcher.sh```
 ```./install_launcher.sh```
 
+## Launch the demos
 You can now:
 1. Find **'Robotics Demo'** in your applications menu
 
@@ -22,3 +23,9 @@ The first terminal will ask for your Vision AI Kit's password and continue setup
 - Open the flask app in a browser window by navigating to ```[Vision AI Kit 6490 IP address]:5000```
 
 - Position the Gazebo environment on top of the flask app. 
+
+## Stop the demos
+To stop Part 1 of the demo, simply close the terminal.
+
+To stop Part 2 of the demo, open a new terminal and type:
+```docker stop robotics_demo stop```
