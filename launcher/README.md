@@ -1,6 +1,8 @@
 # Launcher Instructions
+- Clone the robotics docker:
+```git clone https://github.com/zebular13/robotics_docker.git```
 - Open the launcher folder:
-```cd launcher```
+```cd robotics_docker/launcher```
 
 - Edit ```launch_robotics_demo.sh``` to include your board's IP address on **line 9**
 
