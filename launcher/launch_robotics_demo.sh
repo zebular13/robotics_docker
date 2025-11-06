@@ -129,7 +129,7 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
             wget -O /tmp/hand_controller_ros2_qsc6490.tar.gz \
                 "https://github.com/zebular13/hand_controller/releases/download/Flask_QIRP1.4/hand_controller_ros2_qsc6490-flask-gui2.tar.gz"
             
-            # Verify file size (should be around 78.7 MB = ~82,000,000 bytes)
+            # Verify file size (should be around 77 KB = 77000 bytes)
             FILE_SIZE=$(stat -c%s /tmp/hand_controller_ros2_qsc6490.tar.gz 2>/dev/null || stat -f%z /tmp/hand_controller_ros2_qsc6490.tar.gz 2>/dev/null)
             if [ "$FILE_SIZE" -lt 70000 ]; then
                 echo "Error: Downloaded file is too small ($FILE_SIZE bytes). Download may have failed."
