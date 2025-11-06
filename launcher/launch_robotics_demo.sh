@@ -9,6 +9,16 @@ WORKSPACE_DIR="$BASE_DIR/robotics_workspace"
 VISION_KIT_IP="192.168.1.2" # Change this to your actual IP 
 VISION_KIT_PASSWORD="oelinux123"  
 
+# Install sshpass if not already installed
+if ! command -v sshpass &> /dev/null; then
+    echo "sshpass not found. Installing..."
+    sudo apt-get update
+    sudo apt-get install -y sshpass
+    echo "✓ sshpass installed."
+else
+    echo "sshpass already installed."
+fi
+
 # Check if robotics_docker repo exists, if not clone it
 echo "Checking for robotics_docker repository..."
 if [ ! -d "$REPO_DIR" ]; then
@@ -64,7 +74,7 @@ docker compose exec robotics_demo bash -ic '
 if [ ! -f /root/hand_controller/hands-v2-yolov5-linux-x86.eim ]; then
     echo "Downloading Edge Impulse model file..."
     cd /root/hand_controller
-    wget -O hands-v2-yolov5-linux-x86.eim "https://avtinc.sharepoint.com/:u:/t/ET-Downloads/Ec5lhZN6XpZCug51d3brcWMBgfKSJgnYKpF1zopW1LUNqg?e=sgoHmO&download=1"
+    wget -O hands-v2-yolov5-linux-x86.eim "https://github.com/zebular13/hand_controller/releases/download/Flask_QIRP1.4/hands-v2-linux-x86.eim"
     echo "Model file downloaded successfully!"
 else
     echo "Edge Impulse model file already exists."
@@ -117,7 +127,7 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
         if [ ! -f /tmp/hand_controller_ros2_qsc6490.tar.gz ]; then
             echo "Downloading ROS2 package on host machine..."
             wget -O /tmp/hand_controller_ros2_qsc6490.tar.gz \
-                "https://avtinc.sharepoint.com/:u:/t/ET-Downloads/EbMBA64GB35Bjwq5wMnYi0UBP_RiqKUYtWK3QhVd7Wzgtw?e=8jCubK&download=1"
+                "https://github.com/zebular13/hand_controller/releases/download/Flask_QIRP1.4/hand_controller_ros2_qsc6490-flask-gui2.tar.gz"
             
             # Verify file size (should be around 78.7 MB = ~82,000,000 bytes)
             FILE_SIZE=$(stat -c%s /tmp/hand_controller_ros2_qsc6490.tar.gz 2>/dev/null || stat -f%z /tmp/hand_controller_ros2_qsc6490.tar.gz 2>/dev/null)
@@ -150,7 +160,7 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
         if [ ! -f /tmp/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim ]; then
             echo "Downloading Edge Impulse model file on host machine..."
             wget -O /tmp/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim \
-                "https://avtinc.sharepoint.com/:u:/t/ET-Downloads/ER93CZ3Nc8xMomCf9uGyBe8BruM9h48BBru-8s3X-38djQ?e=ZCOr7e&download=1"
+                "https://github.com/zebular13/hand_controller/releases/download/Flask_QIRP1.4/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim"
             
             # Verify file size (should be reasonably large, not an error page)
             FILE_SIZE=$(stat -c%s /tmp/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim 2>/dev/null || stat -f%z /tmp/hands-v2-yolov5-conferencedata-aarch64-qnn-v42.eim 2>/dev/null)
