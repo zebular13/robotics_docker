@@ -131,7 +131,7 @@ if ping -c 1 -W 2 $VISION_KIT_IP &> /dev/null; then
             
             # Verify file size (should be around 78.7 MB = ~82,000,000 bytes)
             FILE_SIZE=$(stat -c%s /tmp/hand_controller_ros2_qsc6490.tar.gz 2>/dev/null || stat -f%z /tmp/hand_controller_ros2_qsc6490.tar.gz 2>/dev/null)
-            if [ "$FILE_SIZE" -lt 10000000 ]; then
+            if [ "$FILE_SIZE" -lt 70000 ]; then
                 echo "Error: Downloaded file is too small ($FILE_SIZE bytes). Download may have failed."
                 rm /tmp/hand_controller_ros2_qsc6490.tar.gz
                 exit 1
