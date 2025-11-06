@@ -1,4 +1,9 @@
 # Launcher Instructions
+## Requirements
+- Vision AI Kit 6490 flashed with [qcom-robotics-full-image-wifi.zip](https://avtincdeu.sharepoint.com/:u:/s/QualcommTechnology/EbCiL7U5rCJNjVeXC3AkkuEB2TUX_M83ujRFKW2x808Agw?e=qNedpa)
+- PC running Ubuntu 22.04 or 24.04 (other versions haven't been tested)
+
+## Instructions
 - Clone the robotics docker:
 ```git clone https://github.com/zebular13/robotics_docker.git```
 - Open the launcher folder:
@@ -9,6 +14,7 @@
 - Run the launcher:
 
 ```chmod +x install_launcher.sh```
+
 ```./install_launcher.sh```
 
 ## Launch the demos
