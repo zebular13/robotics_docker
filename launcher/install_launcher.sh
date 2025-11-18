@@ -8,14 +8,14 @@ echo "Script directory: $SCRIPT_DIR"
 
 # 1. Copy and make launch script executable
 echo "Installing launch script..."
-cp "$SCRIPT_DIR/launch_robotics_demo.sh" ~/launch_robotics_demo.sh
-chmod +x ~/launch_robotics_demo.sh
-echo "✓ Launch script installed to ~/launch_robotics_demo.sh"
+cp "$SCRIPT_DIR/launch_docker.sh" ~/launch_docker.sh
+chmod +x ~/launch_docker.sh
+echo "✓ Launch script installed to ~/launch_docker.sh"
 
 # 2. Update the .desktop file with correct path and install it
 echo "Installing desktop launcher..."
 # Create a temporary .desktop file with updated path
-sed "s|Exec=gnome-terminal -- bash -c \"/home/monica-ssd/launch_robotics_demo.sh|Exec=gnome-terminal -- bash -c \"$HOME/launch_robotics_demo.sh|g" \
+sed "s|Exec=gnome-terminal -- bash -c \"/home/monica-ssd/launch_docker.sh|Exec=gnome-terminal -- bash -c \"$HOME/launch_docker.sh|g" \
     "$SCRIPT_DIR/RoboticsDemo.desktop" > /tmp/RoboticsDemo.desktop
 
 # Copy to applications directory and make executable
@@ -49,7 +49,7 @@ echo "✓ Installation complete!"
 echo ""
 echo "You can now:"
 echo "  1. Find 'Robotics Demo' in your applications menu"
-echo "  2. Run it directly: ~/launch_robotics_demo.sh"
+echo "  2. Run it directly: ~/launch_docker.sh"
 echo ""
 echo "Note: If the icon doesn't appear immediately, try:"
 echo "  - Logging out and back in"
