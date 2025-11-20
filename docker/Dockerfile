@@ -50,6 +50,7 @@ RUN apt-get install -y \
     ros-${ROS_DISTRO}-rqt-reconfigure \
     ros-${ROS_DISTRO}-rqt-joint-trajectory-controller \
     ros-${ROS_DISTRO}-rqt-graph \
+    ros-${ROS_DISTRO}-ros-gz-image \    
     ros-${ROS_DISTRO}-v4l2-camera
 
 # Install additional ROS 2 packages for ASL Controller
@@ -77,6 +78,21 @@ RUN pip install tflite
 #1.573 ERROR: Could not find a version that satisfies the requirement tflite-runtime (from versions: none)                             
 #1.573 ERROR: No matching distribution found for tflite-runtime
 
+# Install Flask
+#RUN pip install Flask
+RUN pip install flask==3.0.0
+
+# Install Edge Impulse API
+RUN pip install edge_impulse_linux
+
+# Install RAI
+#    reference : https://robotecai.github.io/rai/setup/install/
+RUN pip install rai-core
+RUN rai-config-init
+RUN apt-get install -y \
+    ros-${ROS_DISTRO}-rai-interfaces \
+    ffmpeg
+
 # Install additional packages (personnal preferences)
 RUN apt-get install -y \
     v4l-utils \
@@ -102,6 +118,11 @@ RUN mkdir -p /etc/udev/rules.d && \
     mkdir -p /root/ros2_ws/src
 #RUN mkdir -p /etc/udev/rules.d && \
 #    mkdir -p /root/ros2_ws/src/mycobot_ros2
+
+# Copy working versions of mycobot_ros2 (instead of github clone)
+#COPY ./ros2_ws_20251001/src/mycobot_ros2 /root/ros2_ws/src/
+#COPY ./ros2_ws_20251001/src/moveit2 /root/ros2_ws/src/
+#COPY ./ros2_ws_20251001/src/moveit_task_constructor /root/ros2_ws/src/
 
 # Copy the entire project into the container
 # Since we're using the parent directory as context, we can copy everything

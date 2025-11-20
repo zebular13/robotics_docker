@@ -3,7 +3,7 @@
 # Set the base directory where we'll clone/check for the repo
 BASE_DIR="/home/$USER"
 REPO_DIR="$BASE_DIR/robotics_docker"
-WORKSPACE_DIR="$BASE_DIR/robotics_workspace"
+SHARED_DIR="$BASE_DIR/shared"
 
 # Install sshpass if not already installed
 if ! command -v sshpass &> /dev/null; then
@@ -24,20 +24,18 @@ if [ ! -d "$REPO_DIR" ]; then
     echo "Repository cloned successfully!"
     
     # Create persistent storage directory
-    echo "Creating persistent storage directory..."
-    mkdir -p "$WORKSPACE_DIR"
-    
-    # Update docker-compose.yml with persistent storage path
-    echo "Configuring docker-compose.yml for persistent storage..."
-    sed -i "s|/media/albertabeef/Tycho/ROS2/shared/ros2|$WORKSPACE_DIR|g" "$REPO_DIR/compose/docker-compose.yml"
-    echo "docker-compose.yml updated!"
+    echo "Checking for shared directory..."
+    if [ ! -d "$SHARED_DIR" ]; then
+        echo "Creating shared directory..."
+        mkdir -p "$SHARED_DIR"
+    fi
 else
     echo "Repository already exists at $REPO_DIR"
 fi
 
 # Pull the latest Docker image
 echo "Pulling latest Docker image..."
-docker pull albertabeef/robotics_docker:latest
+docker pull albertabeef/robotics_docker:robotics_demo_20251119
 
 # Navigate to the compose directory
 cd "$REPO_DIR/compose"
@@ -53,54 +51,13 @@ sleep 2
 echo "Configuring X-Windows access..."
 xhost +
 
-# Install Python dependencies if not already installed
-echo "Checking Python dependencies..."
-docker compose exec robotics_demo bash -ic '
-if ! python3 -c "import flask" 2>/dev/null || ! python3 -c "import edge_impulse_linux" 2>/dev/null; then
-    echo "Installing missing Python packages..."
-    pip3 install flask==3.0.0 edge_impulse_linux
-else
-    echo "Python dependencies already installed."
-fi
-'
-
-# Download Edge Impulse model file if it doesn't exist
-echo "Checking for Edge Impulse model file..."
-docker compose exec robotics_demo bash -ic '
-if [ ! -f /root/hand_controller/hands-v2-yolov5-linux-x86.eim ]; then
-    echo "Downloading Edge Impulse model file..."
-    cd /root/hand_controller
-    wget -O hands-v2-yolov5-linux-x86.eim "https://github.com/zebular13/hand_controller/releases/download/Flask_QIRP1.4/hands-v2-linux-x86.eim"
-    echo "Model file downloaded successfully!"
-else
-    echo "Edge Impulse model file already exists."
-fi
-'
-
-# Check if workspace is already built, if not build it
-echo "Checking workspace setup..."
-docker compose exec robotics_demo bash -ic '
-if [ ! -f /root/hand_controller/ros2_ws/install/setup.bash ]; then
-    echo "First time setup - building workspace..."
-    cd /root/hand_controller
-    git pull
-    cd ros2_ws
-    colcon build
-    echo "source /root/hand_controller/ros2_ws/install/setup.bash >> /root/.bashrc" 
-    echo "Workspace built successfully!"
-else
-    echo "Workspace already built, skipping build step."
-fi
-'
-
 echo "Launching the demo in new terminal..."
 
 # Launch Part 2 demo in a new terminal window
 gnome-terminal --title="ROS2 Demo Part 2" -- bash -c "
 docker compose -f $REPO_DIR/compose/docker-compose.yml exec robotics_demo bash -ic '
-cd /root/hand_controller/ros2_ws && 
-source install/setup.bash && 
 ros2 launch hand_controller demo11_mogiros_car_part2.launch.py use_imshow:=False
 '; exec bash"
+
 
 echo "Docker demo setup complete!"

@@ -12,17 +12,13 @@ cp "$SCRIPT_DIR/launch_docker.sh" ~/launch_docker.sh
 chmod +x ~/launch_docker.sh
 echo "✓ Launch script installed to ~/launch_docker.sh"
 
-# 2. Update the .desktop file with correct path and install it
+# 2. Install the .desktop file
 echo "Installing desktop launcher..."
-# Create a temporary .desktop file with updated path
-sed "s|Exec=gnome-terminal -- bash -c \"/home/monica-ssd/launch_docker.sh|Exec=gnome-terminal -- bash -c \"$HOME/launch_docker.sh|g" \
-    "$SCRIPT_DIR/RoboticsDemo.desktop" > /tmp/RoboticsDemo.desktop
 
-# Copy to applications directory and make executable
+# Copy .desktop file to applications directory and make executable
 mkdir -p ~/.local/share/applications
-cp /tmp/RoboticsDemo.desktop ~/.local/share/applications/RoboticsDemo.desktop
+cp "$SCRIPT_DIR/RoboticsDemo.desktop" ~/.local/share/applications/RoboticsDemo.desktop
 chmod +x ~/.local/share/applications/RoboticsDemo.desktop
-rm /tmp/RoboticsDemo.desktop
 echo "✓ Desktop launcher installed to ~/.local/share/applications/RoboticsDemo.desktop"
 
 # 3. Install custom icon if it exists

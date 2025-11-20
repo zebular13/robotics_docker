@@ -7,6 +7,28 @@ ROS_DISTRO="jazzy"
 # Source ROS 2 setup
 source /opt/ros/$ROS_DISTRO/setup.bash
 
+#
+# Edge Impulse
+#
+
+# Install Edge Impulse
+#    reference : https://docs.edgeimpulse.com/tools/clis/edge-impulse-cli/installation
+curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+#
+mkdir ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH=~/.npm-global/bin:$PATH' >> /root/.bashrc
+#
+npm install -g edge-impulse-cli
+npm install -g edge-impulse-linux
+#
+sed -i 's/^from edge_impulse_linux import audio/#from edge_impulse_linux import audio/' /usr/local/lib/python3.12/dist-packages/edge_impulse_linux/__init__.py
+
+#
+# MongoDB
+#
+
 # Install system dependencies for MongoDB and PCL
 apt-get update && apt-get install -y \
     gnupg \
@@ -30,23 +52,6 @@ systemctl enable mongod || echo "Warning: Could not enable MongoDB service. This
 echo "Update ROS2 ..."
 rosdep update
 
-#
-# MoveIt2 (from source)
-#
-
-cd /root/ros2_ws/src
-git clone --branch jazzy https://github.com/ros-planning/moveit2.git
-cd /root/ros2_ws/src/moveit2
-rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y
-colcon build --mixin release
-# CMake Error at /opt/ros/jazzy/share/ompl/cmake/omplConfig.cmake:11 (message):
-#   File or directory /usr/local/lib/x86_64-linux-gnu referenced by variable
-#   OMPL_LIBRARY_DIRS does not exist !
-# Call Stack (most recent call first):
-#   /opt/ros/jazzy/share/ompl/cmake/omplConfig.cmake:108 (set_and_check)
-#   CMakeLists.txt:23 (find_package)
-#colcon build --mixin release --packages-skip moveit_planners_ompl
-source install/setup.bash
 
 #
 # ASL Controller
@@ -88,6 +93,9 @@ source install/setup.bash
 # Hand Controller
 #
 
+# Install extra dependencies
+pip3 install flask==3.0.0 edge_impulse_linux
+
 # Install hand_controller
 echo "Installing hand_controller ..."
 cd /root
@@ -106,6 +114,12 @@ if [ ! -d "hand_controller" ]; then
     cd blaze_app_python/blaze_pytorch/models
     source ./get_pytorch_models.sh
     cd ../../..
+    # Remove Edge Impulse models for qcs6490 host
+    rm hands-v2-*-qnn-*.eim
+    # Download Edge Impulse models for x86 host
+    cd /root/hand_controller
+    wget -O hands-v2-yolov5-linux-x86.eim "https://github.com/zebular13/hand_controller/releases/download/Flask_QIRP1.4/hands-v2-linux-x86.eim"
+    chmod +x hands-v2-yolov5-linux-x86.eim
 fi
 
 # Copy hand_controller to ros2_ws/src and Build
@@ -120,16 +134,11 @@ colcon build
 source install/setup.bash
 
 #
-# MyCobot 280
+# MongoDB
 #
 
 # Navigate to the workspace
 cd /root/ros2_ws/src
-
-# Install mycobot_ros2 if not already present
-if [ ! -d "mycobot_ros2" ]; then
-    git clone https://github.com/automaticaddison/mycobot_ros2.git -b jazzy
-fi
 
 # Install warehouse_ros_mongo if not already present
 if [ ! -d "warehouse_ros_mongo" ]; then
@@ -139,14 +148,6 @@ if [ ! -d "warehouse_ros_mongo" ]; then
     cd ..
 fi
 
-# Install MoveIt Task Constructor if not already present
-if [ ! -d "moveit_task_constructor" ]; then
-    git clone https://github.com/moveit/moveit_task_constructor.git -b jazzy
-    #cd moveit_task_constructor
-    #git reset --hard 9ced9fc10a15388224f0741e5a930a33f4ed6255
-    #cd ..
-fi
-
 # Navigate back to the workspace root
 cd /root/ros2_ws
 
@@ -154,68 +155,10 @@ cd /root/ros2_ws
 echo "Installing ROS 2 dependencies..."
 rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y
 
-# Now apply all the fixes after dependencies are installed
-
-# Fix storage.cpp
-echo "Fixing storage.cpp..."
-cd /root/ros2_ws/src/moveit_task_constructor
-if [ -f core/src/storage.cpp ]; then
-    # Create backup
-    cp core/src/storage.cpp core/src/storage.cpp.backup
-
-    # Replace the four lines with the new line using sed
-    sed -i '/if (this->end()->scene()->getParent() == this->start()->scene())/,+3c\    this->end()->scene()->getPlanningSceneDiffMsg(t.scene_diff);' core/src/storage.cpp || echo "Warning: Could not modify storage.cpp"
-fi
-
-# Fix cartesian_path.cpp
-echo "Fixing cartesian_path.cpp..."
-if [ -f core/src/solvers/cartesian_path.cpp ]; then
-    # Create backup
-    cp core/src/solvers/cartesian_path.cpp core/src/solvers/cartesian_path.cpp.backup
-
-    # Make the replacement
-    sed -i 's/moveit::core::JumpThreshold(props.get<double>("jump_threshold")), is_valid,/moveit::core::JumpThreshold::relative(props.get<double>("jump_threshold")), is_valid,/' core/src/solvers/cartesian_path.cpp || echo "Warning: Could not modify cartesian_path.cpp"
-fi
-
-cd /root/ros2_ws
-
-# Fix PCL warning - this needs to come after rosdep install
-echo "Fixing PCL warnings..."
-find /usr/include/pcl* -path "*/sample_consensus/impl/sac_model_plane.hpp" -exec sed -i 's/^\(\s*\)PCL_ERROR ("\[pcl::SampleConsensusModelPlane::isSampleGood\] Sample points too similar or collinear!\\n");/\1\/\/ PCL_ERROR ("[pcl::SampleConsensusModelPlane::isSampleGood] Sample points too similar or collinear!\\n");/' {} \;
-
-# Build the packages
-echo "Building packages..."
-# First build without the problematic package
-colcon build --packages-skip mycobot_mtc_pick_place_demo
-source install/setup.bash
-
-# Then build the problematic package with warning suppression
-colcon build --packages-select mycobot_mtc_pick_place_demo --cmake-args -Wno-dev
-source install/setup.bash
-
 # Final build of everything
 colcon build
 source install/setup.bash
 
-
-#
-# Yahboom ROSMASTER-X3
-#
-
-# Install yahboom_rosmaster if not already present
-cd /root/ros2_ws/src
-if [ ! -d "yahboom_rosmaster" ]; then
-    git clone https://github.com/automaticaddison/yahboom_rosmaster.git
-fi
-
-# Build yahboom_rosmaster
-cd /root/ros2_ws/src
-echo "Installing ROS 2 dependencies for yahboom_rosmaster ..."
-rosdep install -i --from-path yahboom_rosmaster --rosdistro $ROS_DISTRO -y
-echo "Building yahboom_rosmaster ..."
-cd /root/ros2_ws/src/yahboom_rosmaster
-colcon build
-source install/setup.bash
 
 #
 # MOGI-ROS
@@ -245,7 +188,67 @@ source install/setup.bash
 # Unzip gazebo models
 cd /root
 unzip gazebo_models.zip
-  
+
+#
+# LLM-based content
+#
+
+# llm-robot-control
+cd /root
+git clone https://github.com/AlbertaBeef/llm-robot-control
+cd /root/llm-robot-control
+pip3 install -r requirements.txt
+#rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y
+   #/usr/bin/rosdep:6: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+   #  from pkg_resources import load_entry_point
+   #ERROR: the following packages/stacks could not have their rosdep keys resolved
+   #to system dependencies:
+   #ros2_ai_interfaces: Cannot locate rosdep definition for [transforms3d]
+   #ros2_ai_agent: Cannot locate rosdep definition for [moveit-py]
+   #ros2_ai_eval: Cannot locate rosdep definition for [moveit-py]
+   #Continuing to install resolvable dependencies...
+   #All required rosdeps installed successfully
+colcon build
+source install/setup.bash
+echo 'source /root/llm-robot-control/install/setup.bash' >> /root/.bashrc
+
+# Universal Robotics (UR)
+apt install -y ros-$ROS_DISTRO-ur
+apt install -y ros-$ROS_DISTRO-ur-simulation-gz
+
+# Install RAI
+#   reference : https://robotecai.github.io/rai/setup/install/
+curl -sSL https://install.python-poetry.org | python3 -
+echo 'export PATH=~/.local/bin:$PATH' >> /root/.bashrc
+#
+cd /root
+git clone https://github.com/RobotecAI/rai.git
+#
+cd /root/rai
+vcs import < ros_deps.repos
+#
+cd /root/rai
+/root/.local/bin/poetry install
+/root/.local/bin/poetry install --all-groups
+#
+cd /root/rai
+rosdep install --from-paths src --ignore-src -r -y
+#
+cd /root/rai
+pip3 install empy
+pip3 install catkin_pkg
+colcon build --symlink-install
+source ~/rai/install/setup.bash 
+echo 'source ~/rai/install/setup.bash' >> /root/.bashrc
+#
+cd /root/rai
+apt-get install -y zip
+./scripts/download_demo.sh manipulation
+./scripts/download_demo.sh rosbot
+./scripts/download_demo.sh agriculture
+
+
+ 
 #
 # Final Build
 #

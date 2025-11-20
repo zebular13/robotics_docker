@@ -9,7 +9,7 @@ services:
       - DISPLAY
       - XAUTHORITY=/tmp/.Xauthority
     volumes:
-      - /home/monica-ssd/Documents/Qualcomm/ros_workspace:/root/shared/ros2
+      - $HOME/robotics_docker/shared:/root/shared
       - $HOME/.Xauthority:/tmp/.Xauthority
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev:/dev
@@ -17,16 +17,19 @@ services:
 
   # The following services are commented out for this tutorial.
   # They demonstrate how to create multiple containers from the same Docker image,
-  # each running a specific ROS 2 node. These containers can communicate with each other
+  # each running a specific ROS 2 graph. These containers can communicate with each other
   # because they share the same ROS_DOMAIN_ID.
-  # Publisher service: Runs the demo talker node
-  minimal_publisher:
+  # robotics_demo_part1 service: Runs the hand_controller
+  robotics_demo_part1:
     <<: *robotics_demo  # This uses all the same settings as the 'manipulation' service
-    container_name: minimal_publisher
-    command: ["ros2", "run", "demo_nodes_cpp", "talker"]
+    container_name: robotics_demo_part1
+    # ros2 launch hand_controller demo11_mogiros_car_part1_ei1dials.launch.py verbose:=False model:=/root/hand_controller/hands-v2-yolov5-linux-x86.eim use_flask:=True x_t:=0.20 z_t:=0.20
+    command: ["ros2", "launch hand_controller", "demo11_mogiros_car_part1_ei1dials.launch.py", "verbose:=False", "model:=/root/hand_controller/hands-v2-yolov5-linux-x86.eim", "use_flask:=True", "x_t:=0.20", "z_t:=0.20"]
 
-  # Subscriber service: Runs the demo listener node
-  minimal_subscriber:
+  # robotics_demo_part2 service: Runs the gazebo simulation
+  robotics_demo_part2:
     <<: *robotics_demo  # This uses all the same settings as the 'manipulation' service
-    container_name: minimal_subscriber
-    command: ["ros2", "run", "demo_nodes_cpp", "listener"]
+    container_name: robotics_demo_par2
+    # ros2 launch hand_controller demo11_mogiros_car_part2.launch.py use_imshow:=False
+    command: ["ros2", "launch", "hand_controller", "demo11_mogiros_car_part2.launch.py", "use_imshow:=False"]
+

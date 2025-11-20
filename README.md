@@ -12,18 +12,13 @@ Additional content:
     - built from source, for moveit_py package
 - ASL Controller
    - https://github.com/AlbertaBeef/asl_mediapipe_pointnet
-- MyCobot-280 simulation
-   - https://github.com/automaticaddison/mycobot_ros2 (branch=jazzy)
-   - https://github.com/moveit/moveit_task_constructor (branch=jazzy)
-   - https://github.com/moveit/warehouse_ros_mongo (branch=ros2)
-- Yahboom ROSMASTER-X3 simulation
-   - https://github.com/automaticaddison/yahboom_rosmaster
 - MOGI-ROS simulation
    - https://github.com/MOGI-ROS/mogi_trajectory_server
    - https://github.com/MOGI-ROS/Week-3-4-Gazebo-basics
    - https://github.com/MOGI-ROS/Week-5-6-Gazebo-sensors
    - https://github.com/MOGI-ROS/Week-7-8-ROS2-Navigation
    - https://github.com/MOGI-ROS/Week-9-10-Simple-arm
+- UR simulation
 
 ## Cloning the repo
 
@@ -51,7 +46,7 @@ Then launch the Docker build script as follows:
 ## Launching the Docker image
 
 If not done so already, build Docker image, or download the image from Docker Hub:
-   - docker pull albertabeef/robotics_docker:latest
+   - docker pull albertabeef/robotics_docker:robotics_demo_20251119
 
 Create a directory for shared content, and indicate its location in the following file:
    - robotics_docker/compose/docker-compose.yml 
@@ -105,26 +100,6 @@ Control Vehicle with Hand Signs
 ![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo01_ros2_gazebo.gif)
 
 
-## Running the ASL-controlled Yahboom ROSMASTER-X3 demo
-
-Launch the asl_controller_twist node with ROSMASTER-X3 vehicle:
-
-   - ros2 launch asl_mediapipe_pointnet demo12_rosmaster_part1_asl.launch.py | ros2 launch asl_mediapipe_pointnet demo12_rosmaster_part2.launch.py
-
-Launch the hand_controller_asl_twist node with ROSMASTER-X3 vehicle:
-
-   - ros2 launch hand_controller demo12_rosmaster_part1_asl.launch.py | ros2 launch hand_controller demo12_rosmaster_part2.launch.py
-
-Control Vehicle with Hand Signs
-
-   - A : Advance
-   - B : Backup
-   - L : Turn Left
-   - R : Turn Right
-
-![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo02_ros2_gazebo_rosmaster.gif)
-
-
 ## Running the ASL-controlled MOGI-ROS robotic arm demo
 
 Launch the asl_controller_pose node with MOGI-ROS simple robotic arm:
@@ -152,40 +127,12 @@ Control Robotic Arm with Left/Right Hands:
 ![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo04_ros2_gazebo_mogiros_arm.gif)
 
 
-## Running the ASL-controlled MYCOBOT-280 robotic arm demo
-
-Launch the asl_controller_pose node with MYCOBOT-280 robotic arm:
-
-   - moveit &
-   - ros2 launch asl_mediapipe_pointnet demo31_mycobot_part1_asl.launch.py | ros2 launch hand_controller demo31_mycobot_part2.launch.py
-
-Launch the hand_controller_asl_pose node with MYCOBOT-280 robotic arm:
-
-   - moveit &
-   - ros2 launch hand_controller demo31_mycobot_part1_asl.launch.py | ros2 launch hand_controller demo31_mycobot_part2.launch.py
-
-
-Control Robotic Arm with Hand Signs
-
-   - L : Move Left
-   - R : Move Right
-   - A : Move Forward
-   - B : Move Backward
-   - U : Move Up
-   - Y : Move Down
-
-![](https://github.com/AlbertaBeef/asl_mediapipe_pointnet/blob/main/images/asl_mediapipe_pointnet_demo03_ros2_gazebo_mycobot.gif)
 
 
 ## References
 
 The Complete Guide to Docker for ROS 2 Jazzy Projects
    - https://automaticaddison.com/the-complete-guide-to-docker-for-ros-2-jazzy-projects/
-
-Automatic Addison on-line Tutorials:
-   - https://automaticaddison.com/tutorials
-   - https://github.com/automaticaddison/mycobot_ros2 (branch=jazzy)
-   - https://github.com/automaticaddison/yahboom_rosmaster
 
 MOGI-ROS on-line Tutorials:
    - https://github.com/MOGI-ROS/Week-1-2-Introduction-to-ROS2
