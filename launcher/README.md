@@ -33,3 +33,11 @@ To stop Part 1 of the demo, simply close the terminal.
 
 To stop Part 2 of the demo, open a new terminal and type:
 ```docker stop robotics_demo```
+
+## Launch Vision AI Kit 6490 ROS2 Demo
+This script connects to the Vision AI Kit 6490 via SSH, where it builds and launches a Flask app to do hand control.
+
+First, change the IP address on **line 4** of ```launch_vision_ai_kit.sh``` to your actual IP address.
+
+Launch it from any terminal on your PC:
+```./launch_vision_ai_kit.sh```
