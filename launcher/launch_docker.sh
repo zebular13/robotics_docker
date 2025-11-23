@@ -5,6 +5,8 @@ BASE_DIR="/home/$USER"
 REPO_DIR="$BASE_DIR/robotics_docker"
 SHARED_DIR="$BASE_DIR/shared"
 
+DOCKER_TAG="robotics_demo_20251119"
+
 # Install sshpass if not already installed
 if ! command -v sshpass &> /dev/null; then
     echo "sshpass not found. Installing..."
@@ -33,12 +35,14 @@ else
     echo "Repository already exists at $REPO_DIR"
 fi
 
-# Pull the latest Docker image
-echo "Pulling latest Docker image..."
-docker pull albertabeef/robotics_docker:robotics_demo_20251119
+# Pull the Docker image
+echo "Pulling Docker image (tag=${DOCKER_TAG}) ..."
+docker pull albertabeef/robotics_docker:$DOCKER_TAG
 
 # Navigate to the compose directory
 cd "$REPO_DIR/compose"
+
+sed -i "s|image: albertabeef/robotics_docker:latest|image: albertabeef/robotics_docker:$DOCKER_TAG|g" "$REPO_DIR/compose/docker-compose.yml"
 
 # Launch the docker container
 echo "Starting Docker container..."
